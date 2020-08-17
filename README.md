@@ -1,6 +1,6 @@
 turboPy
 =======================
-[![DOI](https://zenodo.org/badge/242016626.svg)](https://zenodo.org/badge/latestdoi/242016626)
+[![DOI](https://zenodo.org/badge/268071520.svg)](https://zenodo.org/badge/latestdoi/268071520)
 [![Documentation Status](https://readthedocs.org/projects/turbopy/badge/?version=latest)](https://turbopy.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/NRL-Plasma-Physics-Division/turbopy.svg?branch=main)](https://travis-ci.org/NRL-Plasma-Physics-Division/turbopy)
 [![codecov](https://codecov.io/gh/NRL-Plasma-Physics-Division/turbopy/branch/main/graph/badge.svg)](https://codecov.io/gh/NRL-Plasma-Physics-Division/turbopy)
@@ -27,19 +27,19 @@ More Resources
 -   The preprint of the turboPy paper can be found [here](https://arxiv.org/pdf/2002.08842.pdf)
 
 
-turboPy Conda environment
--------------------------
+Install turboPy
+---------------
 
--   Create a conda environment for turboPy: `conda env create -f environment.yml`
--   Activate: `conda activate turbopy`
--   Install turboPy into the environment (from the main folder where setup.py is): 
-	- Install turboPy in editable mode (i.e. setuptools "develop mode") if you are modifying turboPy itself: `pip install -e .` 
-	- If you just plan to develop a code using the existing turboPy framework: `pip install .` 
--   Run tests: `pytest`
+-   Install: `pip install turbopy`
 
 
 turboPy development environment
 -------------------------------
+
+-   Create a conda environment for turboPy: `conda env create -f environment.yml`
+-   Activate: `conda activate turbopy`
+-   Install turboPy in editable mode (i.e. setuptools "develop mode") if you are modifying turboPy itself: `pip install -e .` 
+-   Run tests: `pytest`
 
 If using `pylint` (which you should!) add `variable-rgx=[a-z0-9_]{1,30}$` to your .pylintrc file to allow single character variable names.
 
