@@ -171,6 +171,9 @@ class Simulation:
         """
         print("Reading Grid...")
         self.read_grid_from_input()
+        
+        print("Initializing Simulation Clock...")
+        self.read_clock_from_input()
 
         print("Reading Tools...")
         self.read_tools_from_input()
@@ -180,9 +183,6 @@ class Simulation:
 
         print("Reading Diagnostics...")
         self.read_diagnostics_from_input()
-
-        print("Initializing Simulation Clock...")
-        self.read_clock_from_input()
 
         print("Initializing Tools...")
         for t in self.compute_tools:
@@ -252,13 +252,8 @@ class Simulation:
                       self.input_data["Diagnostics"].items()
                       if not Diagnostic.is_valid_name(k)}
 
-            if "directory" in params:
-                d = Path(params["directory"])
-            else:
-                # Set a default output directory
-                d = Path("default_output")
-                params["directory"] = str(d)
-            d.mkdir(parents=True, exist_ok=True)
+            if "directory" not in params:
+                params["directory"] = str(Path("default_output"))
 
             for diag_type, d in diags.items():
                 diagnostic_class = Diagnostic.lookup(diag_type)
@@ -598,6 +593,13 @@ class SimulationClock:
         self.time = self.start_time + self.dt * self.this_step
         if self.print_time:
             print(f"t = {self.time}")
+    
+    def turn_back(self, num_steps=1):
+        """Set the time back `num_steps` time steps"""
+        self.this_step = self.this_step - num_steps
+        self.time = self.start_time + self.dt * self.this_step
+        if self.print_time:
+            print(f"t = {self.time}")        
 
     def is_running(self):
         """Check if time is less than end time"""
@@ -940,9 +942,12 @@ class Diagnostic(DynamicFactory):
     def initialize(self):
         """Perform any initialization operations
 
-        This gets called once before the main simulation loop.
+        This gets called once before the main simulation loop. Base class
+        definition creates output directory if it does not already exist. If
+        subclass overrides this function, call `super().initialize()`
         """
-        pass
+        d = Path(self._input_data["directory"])
+        d.mkdir(parents=True, exist_ok=True)
 
     def finalize(self):
         """Perform any finalization operations
