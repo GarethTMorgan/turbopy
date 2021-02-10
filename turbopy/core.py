@@ -3,19 +3,21 @@ Core base classes of the turboPy framework
 
 Notes
 -----
-A preprint of the paper describing this code is available on
-the arxiv [1]_.
+The published paper for Turbopy: A lightweight python framework for computational physics \
+ can be found in the link below [1]_.
 
 References
 ----------
-.. [1] A. S. Richardson et al., "TurboPy: A Lightweight Python Framework
-       for Computational Physics." Preprint available online:
-       https://arxiv.org/abs/2002.08842
+.. [1] 1 A.S. Richardson, D.F. Gordon, S.B. Swanekamp, I.M. Rittersdorf, P.E. Adamson, \
+O.S. Grannis, G.T. Morgan, A. Ostenfeld, K.L. Phlips, C.G. Sun, G. Tang, and D.J. Watkins, \
+Comput. Phys. Commun. 258, 107607 (2021). \
+https://doi.org/10.1016/j.cpc.2020.107607
 
 """
 from pathlib import Path
 from abc import ABC, abstractmethod
 import numpy as np
+import warnings
 
 
 class Simulation:
@@ -35,7 +37,7 @@ class Simulation:
 
         Expected keys are:
 
-        ``"Grid"``
+        ``"Grid"``, optional
             Dictionary containing parameters needed to define the grid.
             Currently only 1D grids are defined in turboPy.
 
@@ -169,9 +171,13 @@ class Simulation:
         Prepares the simulation by reading the input and initializing
         physics modules and diagnostics.
         """
-        print("Reading Grid...")
-        self.read_grid_from_input()
-        
+        if 'Grid' in self.input_data:
+            print("Reading Grid...")
+            self.read_grid_from_input()
+        else:
+            warnings.warn('No Grid Found.')
+            print("Initializing Gridless Simulation...")
+
         print("Initializing Simulation Clock...")
         self.read_clock_from_input()
 
@@ -227,11 +233,12 @@ class Simulation:
                     tool["type"] = tool_name
                     self.compute_tools.append(tool_class(owner=self, 
                                                          input_data=tool)) 
-    
+
     def read_modules_from_input(self):
         """Construct :class:`PhysicsModule` instances based on input"""
         for physics_module_name, physics_module_data in \
                 self.input_data["PhysicsModules"].items():
+            print(f"Loading physics module: {physics_module_name}...")
             physics_module_class = PhysicsModule.lookup(physics_module_name)
             physics_module_data["name"] = physics_module_name
             self.physics_modules.append(physics_module_class(
@@ -403,6 +410,8 @@ class PhysicsModule(DynamicFactory):
         resource : `dict`
             resource dictionary to be shared
         """
+        for k in resource.keys():
+            print(f"Module {self.__class__.__name__} is sharing {k}")
         for physics_module in self._owner.physics_modules:
             physics_module.inspect_resource(resource)
         for diagnostic in self._owner.diagnostics:
@@ -431,7 +440,7 @@ class PhysicsModule(DynamicFactory):
         not start with an underscore) will be shared with the key
         `<class_name>_<attribute_name>`.
         """
-        shared = {f'{self.__class__}_{attribute}': value for attribute, value
+        shared = {f'{self.__class__.__name__}_{attribute}': value for attribute, value
                   in self.__dict__.items()
                   if not attribute.startswith('_')}
         self.publish_resource(shared)
@@ -592,7 +601,7 @@ class SimulationClock:
         self.this_step += 1
         self.time = self.start_time + self.dt * self.this_step
         if self.print_time:
-            print(f"t = {self.time}")
+            print(f"t = {self.time:0.4e}")
     
     def turn_back(self, num_steps=1):
         """Set the time back `num_steps` time steps"""
